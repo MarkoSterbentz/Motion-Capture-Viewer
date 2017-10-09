@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    
+    <script type="text/javascript" src="./common/webgl-utils.js"></script>
+    <script type="text/javascript" src="./common/initShaders.js"></script>
+    <script type="text/javascript" src="./common/MV.js"></script>
+
+    <script type="text/javascript" src="./test1.bvh.js"></script>
+    <script type="text/javascript" src="./test2.bvh.js"></script>
+
+    <!------------------------------------------------------------>
+    <!------------------------ Line shaders ---------------------->
+    <!------------------------------------------------------------>
+
+
+    <script id="line-vshader" type="x-shader/x-vertex">
+        attribute vec4 vPosition;
+        attribute vec4 vColor;
+        varying vec4 fColor;
+        
+        uniform mat4 mvMatrix;
+        uniform mat4 pMatrix;
+        
+        void main() {
+          gl_Position = pMatrix*mvMatrix*vPosition;
+          fColor = vColor;
+        } 
+    </script>
+
+    <script id="line-fshader" type="x-shader/x-fragment">
+      
+      #ifdef GL_ES
+      precision highp float;
+      #endif
+      
+      varying vec4 fColor;
+      
+      void main() {
+        gl_FragColor = fColor;
+      }
+    </script>
+    <!------------------------------------------------------------>
+    <!---------------------- Sphere shaders ---------------------->
+    <!------------------------------------------------------------>
+    <script id="sphere-vshader" type="x-shader/x-vertex">
+      attribute vec4 vPosition;
+      attribute vec4 vNormal;
+      attribute vec4 vColor;
+      varying vec4 fColor;
+      varying highp vec3 vLighting;
+      
+      uniform mat4 mvMatrix;
+      uniform mat4 pMatrix;
+      uniform mat4 nMatrix;
+      
+      void main() {
+        gl_Position = pMatrix*mvMatrix*vPosition;
+
+        highp vec3 ambientColor = vec3(0.6, 0.6, 0.6);
+        highp vec3 lightColor = vec3(0.5, 0.5, 0.75);
+        highp vec3 lightVector = vec3(0.85, 0.8, 0.75);
+
+        highp vec4 tNormal = nMatrix * vNormal;
+        tNormal = normalize(tNormal);
+        highp float directional = max(dot(tNormal.xyz, lightVector), 0.0);
+        vLighting = ambientColor + (lightColor * directional);
+        fColor = vColor;
+      } 
+    </script>
+    <script id="sphere-fshader" type="x-shader/x-fragment">
+      
+      #ifdef GL_ES
+      precision highp float;
+      #endif
+      
+      varying vec4 fColor;
+      varying highp vec3 vLighting;
+      
+      void main() {
+        gl_FragColor = vec4(fColor.xyz * vLighting, fColor.a);
+        //gl_FragColor = fColor;
+      }
+    </script>
+
+    <script src="./common/require.js"></script>
+    <script src="./common/axis.js"></script>
+    <script src="./common/sphere.js"></script>
+    <script src="./common/floor.js"></script>
+    <script src="./common/segment.js"></script>
+    <!-- <script src="./common/cylinder.js"></script> -->
+    <script type="text/javascript" src="mocap.js"></script>
+    
+  </head>
+
+  <body>
+    <input type="file" id="fileInput">
+    <br>
+    <canvas id="gl-canvas" width="1024" height="512">
+      Oops ... your browser doesn't support the HTML5 canvas element
+    </canvas>
+    
+  </body>
+</html>
